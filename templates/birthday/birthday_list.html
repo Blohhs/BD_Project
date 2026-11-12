@@ -8,19 +8,18 @@
   <h1 class="pb-2 mb-0">Список дней рождения</h1>
   
   <div class="mt-4">
-    {% for birthday in birthdays %}
+    {% for birthday in page_obj %}
       <div>
         <div>
           <strong>{{ birthday.first_name }} {{ birthday.last_name }}</strong> - {{ birthday.birthday|date:"d E Y" }}
         </div>
         
         <div class="mt-2 d-flex gap-2">
+          <a href="{% url 'birthday:detail' birthday.id %}" class="btn btn-sm btn-outline-info">Сколько до дня рождения?</a>
+          
           <a href="{% url 'birthday:edit' birthday.id %}" class="btn btn-sm btn-outline-primary">Изменить</a>
           
-          <form action="{% url 'birthday:delete' birthday.id %}" method="post" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
-          </form>
+          <a href="{% url 'birthday:delete' birthday.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
         </div>
         
         {% if not forloop.last %}
@@ -31,4 +30,6 @@
       <div>Пока нет ни одного дня рождения.</div>
     {% endfor %}
   </div>
+
+  {% include "includes/paginator.html" %}
 {% endblock %}

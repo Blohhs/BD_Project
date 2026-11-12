@@ -1,4 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator
+from django.views.generic import DeleteView, DetailView
+from django.urls import reverse_lazy
 
 from .forms import BirthdayForm
 from .models import Birthday
@@ -25,19 +28,27 @@ def birthday(request, pk=None):
 
 
 def birthday_list(request):
-    birthdays = Birthday.objects.all()
-    context = {'birthdays': birthdays}
+    birthdays = Birthday.objects.order_by('id')
+    paginator = Paginator(birthdays, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'page_obj': page_obj}
     return render(request, 'birthday/birthday_list.html', context)
 
 
-def delete_birthday(request, pk):
-    instance = get_object_or_404(Birthday, pk=pk)
-    form = BirthdayForm(instance=instance)
-    context = {'form': form}
-    
-    if request.method == 'POST':
-        # ...удаляем объект:
-        instance.delete()
-        return redirect('birthday:list') 
-        
-    return render(request, 'birthday/birthday.html', context)
+class BirthdayDeleteView(DeleteView):
+    model = Birthday
+    template_name = 'birthday/birthday_confirm_delete.html'
+    success_url = reverse_lazy('birthday:list')
+
+
+class BirthdayDetailView(DetailView):
+    model = Birthday
+    template_name = 'birthday/birthday_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['birthday_countdown'] = calculate_birthday_countdown(
+            self.object.birthday
+        )
+        return context
