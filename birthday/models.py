@@ -1,5 +1,4 @@
 from django.db import models
-# Импортируем наш валидатор
 from .validators import real_age
 
 
